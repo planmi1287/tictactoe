@@ -1,5 +1,5 @@
 import argparse
-
+import timeit
 
 class Game:
     def __init__(self, length) -> None:
@@ -118,10 +118,10 @@ if __name__ == '__main__':
     )
     parser.add_argument('-gs', '--gridsize', type=int, metavar='N',help='Specify the grid dimensions (NxN)', default=3)
     args = parser.parse_args()
-
     game = Game(args.gridsize)
     
-    
+    start_time = timeit.default_timer()
+
 
     cm = 'X' # current move tracker, X begins
     while True:
@@ -135,25 +135,34 @@ if __name__ == '__main__':
                     print('Quitting...')
                     exit()
                 case ['place', row, col]:
-                    valid_mark = game.place_mark(cm, int(row), int(col))
+                    # input check
+                    if not row.isnumeric() or not col.isnumeric():
+                        valid_mark = -1
+                    else:
+                        valid_mark = game.place_mark(cm, int(row), int(col))
+                    
+                    
                     if valid_mark == 1:
+                        if cm == 'X':
+                            cm = 'O'
+                        else:
+                            cm = 'X'
                         break
                     elif valid_mark == 0:
+                        elapsed_time = timeit.default_timer() - start_time
                         cleancon()
                         game.draw_board()
-                        
+
                         final_res = game.result
                         print('Game finished.')
+                        
                         if final_res[0] == 'DRAW':
-                            print(f'Game has ended with a DRAW after {final_res[3]} moves.')
+                            print(f'Game has ended with a DRAW after {final_res[3]} moves. The game took {elapsed_time:.2f}s to finish.')
                         else:
-                            print(f'Game has been WON by {final_res[1]} with a {final_res[2]} line, after {final_res[3]} moves')
+                            print(f'Game has been WON by {final_res[1]} with a {final_res[2]} line, after {final_res[3]} moves. The game took {elapsed_time:.2f}s to finish.')
                         quit()
                     else:
                         print('Invalid argument(s).')
                 case _:
                     print('Invalid command.')
-        if cm == 'X':
-            cm = 'O'
-        else:
-            cm = 'X'
+        
